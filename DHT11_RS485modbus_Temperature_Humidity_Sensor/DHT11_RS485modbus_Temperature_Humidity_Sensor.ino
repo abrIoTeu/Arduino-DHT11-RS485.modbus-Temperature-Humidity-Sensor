@@ -1,7 +1,7 @@
 // abrIoT DHT11 RS-485 modbus Temperature & Humidity Sensor Firmware
 // Created by: Lantos, Attila
 // Creation date: 26-01-2023
-// Version: 1.0
+// Version: 1.1
 // www.abriot.eu
 
 // Dependencies:
@@ -57,6 +57,9 @@ void loop() {
     while (millis() - start_time <= timeout) {
       ModbusRTUServer.poll();
       readSensor();      
+    }
+    if (millis() - start_time > timeout) {
+      setStatus(3);
     }                 
 }
 
@@ -113,6 +116,8 @@ void readSensor() {
         humidity_int = (int) (humidity * 100);        
         ModbusRTUServer.holdingRegisterWrite(2, humidity_int);
         last_humidity = humidity;
+      } else if (isnan(humidity) || isnan(temperature)) { // Testing for NaN condition      
+        setStatus(2);
       } else {
         _changed = false;
       }          
