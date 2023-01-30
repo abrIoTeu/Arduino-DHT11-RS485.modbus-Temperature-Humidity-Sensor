@@ -4,6 +4,10 @@
 // Version: 1.0
 // www.abriot.eu
 
+// Dependencies:
+//   Aruduino Modbus & RS485 libraries
+//   Adafruit DHT-11 library
+
 // Libraries
 #include <DHT.h>
 #include <DHT_U.h>
