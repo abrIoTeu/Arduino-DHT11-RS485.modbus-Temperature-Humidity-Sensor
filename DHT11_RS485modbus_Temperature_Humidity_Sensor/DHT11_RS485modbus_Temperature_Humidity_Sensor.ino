@@ -9,7 +9,6 @@
 #include <DHT_U.h>
 #include <ArduinoModbus.h>
 
-
 // Setup -> You may change this
 #define MODBUSADDRESS 2
 #define MODBUSBAUD 9600
@@ -19,7 +18,7 @@ int timeout = 1000; // Modbus polling and sensor reading timeout in milliseconds
 
 bool debug = true; // If true -> Serial monitor will be used to display messages
 
-// DHT11 Sensor -> Please DO NOT change this
+// DHT11 Sensor -> Please DO NOT change these
 #define DHTPIN 3
 #define DHTTYPE DHT11
 DHT DHT(DHTPIN, DHTTYPE);
@@ -35,6 +34,9 @@ long last_time = 0;
 long start_time = 0;
 bool startup = true;
 bool error = false;
+int status = 0;
+bool modbus = false;
+String status_text[4] = {"OK", "Modbus error", "Sensor error", "Timeout error"};
 
 // Setup
 void setup() {  
@@ -64,7 +66,7 @@ void setupGreeting() {
 }
 
 void setupModbus() {
-    if (ModbusRTUServer.begin(MODBUSADDRESS, MODBUSBAUD)) {
+    if (ModbusRTUServer.begin(MODBUSADDRESS, MODBUSBAUD)) {        
     if (debug) {
       Serial.print("Modbus RTU Server started at address: ");
       Serial.print(MODBUSADDRESS);
@@ -72,8 +74,15 @@ void setupModbus() {
       Serial.println(MODBUSBAUD);
       Serial.println("----------");
     }      
-    ModbusRTUServer.configureHoldingRegisters(1, 2);    
+    ModbusRTUServer.configureHoldingRegisters(1,3);
+    // Register 1 = Temperature * 100
+    // Regsiter 2 = Humidity * 100
+    // Register 3 = Status code    
+    modbus = true;
+    setStatus(0);      
   } else {
+    modbus = false;
+    setStatus(1);    
     if (debug) {
       Serial.print("Modbus RTU Server startup FAILED at address: ");
       Serial.print(MODBUSADDRESS);
@@ -113,4 +122,11 @@ void readSensor() {
       }      
       last_time = millis();
     }
+}
+
+void setStatus(int _status) {
+  status = _status;
+  if (modbus) {
+    ModbusRTUServer.holdingRegisterWrite(3, _status);
+  }  
 }
