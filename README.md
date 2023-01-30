@@ -29,8 +29,13 @@ A simple Arduino based Firmware for abrIoT DHT11 RS-485 modbus capable Temperatu
 * Adafruit DHT-11 sensor library
 
 ## Launch
-To launch the project, download the sketch and the dependencies as well. You may modify the project for personal usage and for contribution. Please note that, in accordance our license, **no commercial usage is allowed**.
+To launch the project, download the sketch and the dependencies as well. You may modify the project for personal usage and for contribution. Please note that, in accordance our license, **no commercial usage is allowed**.  
 
-Please revise the variables.
+Please revise the variables like the timeout.  
+
+Modbus regsiters:
+* 1: Temperature * 100 - stored as integer (uint16)
+* 2: Humidity * 100 - stored as integer (uint16)
+* 3: Status code - integer (uint16)
 
 ## 
