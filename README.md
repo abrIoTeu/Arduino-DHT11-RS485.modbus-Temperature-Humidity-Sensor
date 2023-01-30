@@ -47,7 +47,7 @@ Modbus regsiters:
 abrIoT sensor may be used for home automation projects and for development (prototyping) purposes. Since the sensor transfers the data via modbus as a modbus slave, it may be linked to a PLC or HMI as well.
 
 ## Project status
-Under constant development. You may revisit  for time to time for newer versions.
+The abrIoT Project is under constant development. You may revisit  for time to time for newer versions.
 
 ## Sources
 * [Our home page](https://www.abriot.eu)
