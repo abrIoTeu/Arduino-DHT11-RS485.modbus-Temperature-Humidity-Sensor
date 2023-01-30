@@ -5,7 +5,8 @@
 * [Technical parameters](#technical-parameters)
 * [Technologies used](#technologies-used)
 * [Dependencies](#dependencies)
-* [Launch](#lanuch)
+* [Launch](#launch)
+* [Examples of use](#examples-of-use)
 
 ## Introduction
 A simple Arduino based Firmware for abrIoT DHT11 RS-485 modbus capable Temperature & Humidity Sensor.
@@ -38,4 +39,7 @@ Modbus regsiters:
 * 2: Humidity * 100 - stored as integer (uint16)
 * 3: Status code - integer (uint16)
 
-## 
+## Examples of use
+abrIoT sensor may be used for home automation projects and for development (prototyping) purposes. Since the sensor transfers the data via modbus, it may be linked to a PLC or HMI as well.
+
+
