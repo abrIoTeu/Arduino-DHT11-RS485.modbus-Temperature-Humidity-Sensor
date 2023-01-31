@@ -14,8 +14,8 @@
 #include <ArduinoModbus.h>
 
 // Setup -> You may change this
-#define MODBUSADDRESS 2
-#define MODBUSBAUD 9600
+#define MODBUSADDRESS 2 // Sensor device modbus RTU address
+#define MODBUSBAUD 9600 // Default modbus RTU baud rate
 
 int interval = 5000; // Sensor reading interval in milliseconds
 int timeout = 1000; // Modbus polling and sensor reading timeout in milliseconds.
