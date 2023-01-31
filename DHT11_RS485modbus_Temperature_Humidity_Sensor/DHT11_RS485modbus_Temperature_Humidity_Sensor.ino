@@ -46,7 +46,7 @@ String status_text[4] = {"OK", "Modbus error", "Sensor error", "Timeout error"};
 void setup() {  
   pinMode(DHTPIN, INPUT); // DHT11 Sensor pin setup
   setupGreeting();
-  RS485.begin(9600);  
+  RS485.begin(MODBUSBAUD);  
   DHT.begin();
   setupModbus();      
 }
