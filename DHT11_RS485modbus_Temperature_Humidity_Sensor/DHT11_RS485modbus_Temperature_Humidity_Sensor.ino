@@ -5,8 +5,8 @@
 // www.abriot.eu
 
 // Dependencies:
-//   Aruduino Modbus & RS485 libraries
-//   Adafruit DHT-11 library
+//  - Aruduino Modbus & RS485 libraries
+//  - Adafruit DHT-11 library
 
 // Libraries
 #include <DHT.h>
@@ -46,7 +46,8 @@ String status_text[4] = {"OK", "Modbus error", "Sensor error", "Timeout error"};
 void setup() {  
   pinMode(DHTPIN, INPUT); // DHT11 Sensor pin setup
   setupGreeting();
-  RS485.begin(MODBUSBAUD);  
+  RS485.begin(MODBUSBAUD);
+  RS485.setPins(1, 2, -1);  
   DHT.begin();
   setupModbus();      
 }
@@ -118,6 +119,7 @@ void readSensor() {
         last_humidity = humidity;
       } else if (isnan(humidity) || isnan(temperature)) { // Testing for NaN condition      
         setStatus(2);
+        _changed = false;
       } else {
         _changed = false;
       }          
