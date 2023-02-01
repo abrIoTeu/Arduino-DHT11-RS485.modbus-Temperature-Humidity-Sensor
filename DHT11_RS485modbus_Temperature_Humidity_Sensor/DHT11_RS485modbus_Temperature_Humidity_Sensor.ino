@@ -40,14 +40,12 @@ bool startup = true;
 bool error = false;
 int status = 0;
 bool modbus = false;
-String status_text[4] = {"OK", "Modbus error", "Sensor error", "Timeout error"};
+// String status_text[4] = {"OK", "Modbus error", "Sensor error", "Timeout error"};
 
 // Setup
 void setup() {  
   pinMode(DHTPIN, INPUT); // DHT11 Sensor pin setup
-  setupGreeting();
-  RS485.begin(MODBUSBAUD);
-  RS485.setPins(1, 2, -1);  
+  setupGreeting();   
   DHT.begin();
   setupModbus();      
 }
@@ -75,17 +73,17 @@ void setupGreeting() {
 
 void setupModbus() {
     if (ModbusRTUServer.begin(MODBUSADDRESS, MODBUSBAUD)) {        
-    if (debug) {
-      Serial.print("Modbus RTU Server started at address: ");
-      Serial.print(MODBUSADDRESS);
-      Serial.print(" with baudrate: ");
-      Serial.println(MODBUSBAUD);
-      Serial.println("----------");
-    }      
-    ModbusRTUServer.configureHoldingRegisters(1,3);
-    // Register 1 = Temperature * 100
-    // Regsiter 2 = Humidity * 100
-    // Register 3 = Status code    
+      if (debug) {
+        Serial.print("Modbus RTU Server started at address: ");
+        Serial.print(MODBUSADDRESS);
+        Serial.print(" with baudrate: ");
+        Serial.println(MODBUSBAUD);
+        Serial.println("----------");
+      }      
+      ModbusRTUServer.configureHoldingRegisters(1,3);
+      // Register 1 = Temperature * 100
+      // Regsiter 2 = Humidity * 100
+      // Register 3 = Status code    
     modbus = true;
     setStatus(0);      
   } else {
