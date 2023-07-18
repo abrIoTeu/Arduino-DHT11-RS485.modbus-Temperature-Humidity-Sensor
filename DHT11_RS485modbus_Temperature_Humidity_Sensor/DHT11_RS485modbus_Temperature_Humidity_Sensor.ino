@@ -1,31 +1,46 @@
 // abrIoT DHT11 RS-485 modbus Temperature & Humidity Sensor Firmware
 // Created by: Lantos, Attila
 // Creation date: 26-01-2023
-// Version: 1.1
+// Version: 1.3
 // www.abriot.eu
+// Board: ESP8266
 
 // Dependencies:
 //  - Aruduino Modbus & RS485 libraries
 //  - Adafruit DHT-11 library
+//  - Wire (I2C)
+//  - Adafruit SSD1306 library (OLED)
+//  - Adafruit GFX library (OLED)
 
 // Libraries
+#include <dummy.h>
 #include <DHT.h>
 #include <DHT_U.h>
 #include <ArduinoModbus.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 // Setup -> You may change this
+#define BAUD 9600 // Serial baudrate
 #define MODBUSADDRESS 2 // Sensor device modbus RTU address
 #define MODBUSBAUD 9600 // Default modbus RTU baud rate
-
+float correction = -1.6; // Temperature correction due to calibration
 int interval = 5000; // Sensor reading interval in milliseconds
 int timeout = 1000; // Modbus polling and sensor reading timeout in milliseconds.
-
-bool debug = true; // If true -> Serial monitor will be used to display messages
+bool debug = false; // If true -> Serial monitor will be used to display messages
+bool oled = true; // If true -> OLED display will be used
 
 // DHT11 Sensor -> Please DO NOT change these
-#define DHTPIN 3
+#define DHTPIN 2 // DHT11 sensor pin number (Default is GPIO0 for the ESP8266 module)
 #define DHTTYPE DHT11
 DHT DHT(DHTPIN, DHTTYPE);
+
+// OLED display -> Please DO NOT change these
+#define SCREEN_WIDTH 128 // OLED display width in pixels
+#define SCREEN_HEIGHT 64 // OLED display height in pixels
+#define OLED_RESET    -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Variables -> Please DO NOT change these
 float temperature = 0;
@@ -45,34 +60,63 @@ bool modbus = false;
 // Setup
 void setup() {  
   pinMode(DHTPIN, INPUT); // DHT11 Sensor pin setup
-  setupGreeting();   
   DHT.begin();
-  setupModbus();      
+  setupOLED();
+  setupGreeting();     
+  setupModbus();              
 }
 
 // Loop
 void loop() {
-    start_time = millis();
-    while (millis() - start_time <= timeout) {
-      ModbusRTUServer.poll();
-      readSensor();      
+    start_time = millis();   
+    while (millis() - start_time < timeout) {
+      // ModbusRTUServer.poll();
+      readSensor();       
+      if (millis() - start_time >= timeout) {
+        setStatus(3);
+      }
     }
-    if (millis() - start_time > timeout) {
-      setStatus(3);
-    }                 
+    ModbusRTUServer.poll();
 }
 
 // Custom functions
 void setupGreeting() {
+    long _start_time = millis();
     if (debug) {     
-    Serial.begin(9600);
-    Serial.println("DHT-11 Temperature & Humidity Sensor");
-    Serial.println("==========");
+      Serial.begin(BAUD);
+      Serial.println("abrIoT DHT-11 Temperature & Humidity Sensor");
+      Serial.println("==========");
+    if (oled) {
+      display.clearDisplay();
+      display.setCursor(20, 0);
+      display.setTextSize(1);      
+      display.setTextColor(WHITE);
+      display.println("abrIoT DHT-11 Temperature & Humidity Sensor");
+      display.println("==========");
+      display.display();
+      if (millis () - _start_time >= 3000) {
+        display.clearDisplay();
+        display.display();
+      }
+    }
+  }  
+}
+
+void setupOLED() {
+  if (oled) {  
+      if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+        if (debug) {
+          Serial.println("SSD1306 allocation failed!");
+          Serial.println("---------");
+          return;
+        }
+      }      
+      display.cp437(true);
   }  
 }
 
 void setupModbus() {
-    if (ModbusRTUServer.begin(MODBUSADDRESS, MODBUSBAUD)) {        
+    if (ModbusRTUServer.begin(MODBUSADDRESS, MODBUSBAUD)) {       
       if (debug) {
         Serial.print("Modbus RTU Server started at address: ");
         Serial.print(MODBUSADDRESS);
@@ -103,7 +147,7 @@ void readSensor() {
   bool _changed = false;
   if (millis() - last_time >= interval || startup == true) {
       startup = false;
-      temperature = DHT.readTemperature();
+      temperature = DHT.readTemperature() + correction;
       humidity = DHT.readHumidity();
       if (temperature != last_temperature) {        
         _changed = true;
@@ -128,6 +172,19 @@ void readSensor() {
         Serial.print(humidity);
         Serial.println("%");
         Serial.println("----------");
+      }
+      if (_changed && oled) {
+        display.clearDisplay();
+        display.setCursor(0, 10);
+        display.setTextColor(WHITE);
+        display.setTextSize(3);               
+        display.print(temperature);      
+        display.println(" C");
+        display.setCursor(25, 40);
+        display.setTextSize(2);        
+        display.print(humidity);
+        display.print(" %");
+        display.display();        
       }      
       last_time = millis();
     }
